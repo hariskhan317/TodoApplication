@@ -2,12 +2,14 @@ import React, { useEffect, useState, useRef } from 'react'
 import { todo } from '../models/model'
 import { MdEdit, MdDelete } from "react-icons/md";
 import { IoMdCheckmark } from "react-icons/io";
+import { Draggable } from "react-beautiful-dnd";
 interface props {
+  index: number
     todo: todo;
     todos: todo[];
     setTodos: React.Dispatch<React.SetStateAction<todo[]>>;
   }
-const SingleTodo: React.FC<props> = ({ todo, todos, setTodos }) => {
+const SingleTodo: React.FC<props> = ({index, todo, todos, setTodos }) => {
   const inputRef = useRef<HTMLInputElement>(null)
   const [isEdit, setIsEdit] = useState<boolean>(false);
   const [todoEdit, setTodoEdit] = useState<string>(todo.todo)
@@ -30,33 +32,37 @@ const SingleTodo: React.FC<props> = ({ todo, todos, setTodos }) => {
   }, [isEdit])
   
   return (
-    <form className='todos__single' onSubmit={(e) => handleEdit(e,todo.id)}>
-      {isEdit ? (      <input
-        type="text"
-        ref={inputRef}
-        className="input__Editbox"
-        value={todoEdit}
-        onChange={(e) => {
-          setTodoEdit(e.target.value);
-        }}
-        placeholder='Edit a Task'
-      />) : (todo.isDone ? (<s className='todos__single--text'>{todo.todo}</s>) : (<span className='todos__single--text'>{todo.todo}</span>))}
-          <div>
-        <span className="icon" onClick={() => {
-          if (!isEdit && !todo.isDone) {
-            setIsEdit(!isEdit);
-          }
-              }} >
-                  <MdEdit />
-              </span>
-              <span className="icon">
-                  <MdDelete onClick={() => handleDelete(todo.id)} />
-              </span>
-              <span className="icon">
-                <IoMdCheckmark onClick={() => handleDone(todo.id)} />
-              </span>
-          </div>
-    </form>
+    <Draggable draggableId={todo.id.toString()} index={index} >
+      {(provided) => (
+              <form ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className='todos__single' onSubmit={(e) => handleEdit(e,todo.id)}>
+              {isEdit ? (      <input
+                type="text"
+                ref={inputRef}
+                className="input__Editbox"
+                value={todoEdit}
+                onChange={(e) => {
+                  setTodoEdit(e.target.value);
+                }}
+                placeholder='Edit a Task'
+              />) : (todo.isDone ? (<s className='todos__single--text'>{todo.todo}</s>) : (<span className='todos__single--text'>{todo.todo}</span>))}
+                  <div>
+                <span className="icon" onClick={() => {
+                  if (!isEdit && !todo.isDone) {
+                    setIsEdit(!isEdit);
+                  }
+                      }} >
+                          <MdEdit />
+                      </span>
+                      <span className="icon">
+                          <MdDelete onClick={() => handleDelete(todo.id)} />
+                      </span>
+                      <span className="icon">
+                        <IoMdCheckmark onClick={() => handleDone(todo.id)} />
+                      </span>
+                  </div>
+            </form>
+      )}
+    </Draggable>
   )
 }
 
